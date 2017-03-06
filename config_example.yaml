@@ -31,8 +31,9 @@ filter-chain:
   - TrimmingFilter           # trims message's body
   - MessageDownloaderFilter  # saves a copy of each received message in the database
   - CommandExecutorFilter    # parses each message for commands and executes them
-  - AutoEmojifyFilter        # scans for emojifiable parts (e.g. "E X A M P L E"), emojifies them, and responds
-  - HeIsRisenFilter          # says "<name> is risen!" if a person hasn't sent messages in a while (see config below)
+  # - AutoEmojifyFilter        # scans for emojifiable parts (e.g. "E X A M P L E"), emojifies them, and responds
+  # - HeIsRisenFilter          # says "<name> is risen!" if a person hasn't sent messages in a while (see config below)
+  - CarbonCopyFilter
 
 modules:
   commands:
