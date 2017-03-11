@@ -3,6 +3,7 @@ import { dependencies as Inject, singleton as Singleton } from "needlepoint";
 import Threads from "../../core/config/Threads";
 import ChatApi from "../../core/api/ChatApi";
 import Promise from "bluebird";
+import { remove } from "diacritics";
 
 @Singleton
 @Inject(ChatApi, Threads)
@@ -18,7 +19,8 @@ export default class CarbonCopyFilter extends FilterModule {
 
         if (!msg.body) return msg;
 
-        const pingExpressions = msg.body.match(/@\w+/g);
+        const bodyWithoutDiacritics = remove(msg.body);
+        const pingExpressions = bodyWithoutDiacritics.match(/@\w+/g);
 
         if (!pingExpressions) return msg;
 
