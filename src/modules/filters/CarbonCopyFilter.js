@@ -50,8 +50,7 @@ export default class CarbonCopyFilter extends FilterModule {
                         body:
                             `\u{1F4E2} Powiadomienie od: ${senderName}\n` +
                             `\u{1F4E5} W wątku: ${threadName}\n\n` +
-                            `${ msg.body }\n\n` +
-                            `\u{1F517} https://m.me/${ msg.threadID }`
+                            `${ msg.body }`
                     }, targetId)
                 ];
             })
