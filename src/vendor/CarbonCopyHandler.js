@@ -70,7 +70,7 @@ class CarbonCopyHandler {
                         return;
                     }
 
-                    const targetNamePromise = this.api.getUserInfo(targetId).then(info => info[targetId].firstName || Promise.reject("Could not get target name", info));
+                    const targetNamePromise = this.api.getUserInfo(targetId).then(info => info[targetId].name || Promise.reject("Could not get target name", info));
 
                     Promise
                         .all([targetNamePromise, threadNamePromise, senderNamePromise])
@@ -110,7 +110,7 @@ class CarbonCopyHandler {
 
                             return new Promise( (resolve, reject) => {
 
-                                const targetNamePromise = this.api.getUserInfo(participantID).then(info => info[participantID].firstName || Promise.reject("Could not get target name", info));
+                                const targetNamePromise = this.api.getUserInfo(participantID).then(info => info[participantID].name || Promise.reject("Could not get target name", info));
                                 const messageSentPromise = this.api.sendMessage(notificationText(senderName, threadName, msg.body), participantID);
 
                                 Promise

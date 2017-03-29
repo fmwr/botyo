@@ -21,7 +21,7 @@ describe("CarbonCopyHandler", () => {
     new CarbonCopyHandler(message, chatApi, threadsApi).run().then(() => {
       assert.deepEqual(chatApi.sentMessages, [
         ['📢 Powiadomienie od: User One\n📥 W wątku: Thread name\n\nsome content @wr', '11112222' ],
-        ['✔️ Two (wr) powiadomiony', '22223333'],
+        ['✔️ User Two (wr) powiadomiony', '22223333'],
       ]);
       done();
     });
@@ -35,7 +35,7 @@ describe("CarbonCopyHandler", () => {
       assert.deepEqual(chatApi.sentMessages, [
         ['📢 Powiadomienie od: User One\n📥 W wątku: Thread name\n\nsome content @wr @zt', '11112222' ],
         ['📢 Powiadomienie od: User One\n📥 W wątku: Thread name\n\nsome content @wr @zt', '11113333' ],
-        ['✔️ Two (wr) powiadomiony\n✔️ Three (zt) powiadomiony', '22223333'],
+        ['✔️ User Two (wr) powiadomiony\n✔️ User Three (zt) powiadomiony', '22223333'],
       ]);
       done();
     });
@@ -50,7 +50,7 @@ describe("CarbonCopyHandler", () => {
         ['📢 Powiadomienie od: User One\n📥 W wątku: Thread name\n\nsome content @all', '11111111' ],
         ['📢 Powiadomienie od: User One\n📥 W wątku: Thread name\n\nsome content @all', '11112222' ],
         ['📢 Powiadomienie od: User One\n📥 W wątku: Thread name\n\nsome content @all', '11113333' ],
-        ['✔️ One (11111111) powiadomiony\n✔️ Two (11112222) powiadomiony\n✔️ Three (11113333) powiadomiony', '22223333'],
+        ['✔️ User One (11111111) powiadomiony\n✔️ User Two (11112222) powiadomiony\n✔️ User Three (11113333) powiadomiony', '22223333'],
       ]);
       done();
     });
