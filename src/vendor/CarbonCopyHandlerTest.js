@@ -6,8 +6,8 @@ describe("CarbonCopyHandler", () => {
 
   it("does nothing if message does not contain any user handles", done => {
     let message    = sampleMessage("some content wr");
-    let chatApi    = new FakeChatApi();
-    let threadsApi = sampleThreadsApi()
+    let chatApi    = sampleChatApi();
+    let threadsApi = sampleThreadsApi();
     new CarbonCopyHandler(message, chatApi, threadsApi).run().then(() => {
       assert.equal(chatApi.calls.length, 0);
       done();
@@ -16,8 +16,8 @@ describe("CarbonCopyHandler", () => {
 
   it("processes single user handle", done => {
     let message    = sampleMessage("some content @wr");
-    let chatApi    = new FakeChatApi();
-    let threadsApi = sampleThreadsApi()
+    let chatApi    = sampleChatApi();
+    let threadsApi = sampleThreadsApi();
     new CarbonCopyHandler(message, chatApi, threadsApi).run().then(() => {
       assert.deepEqual(chatApi.calls, [
         ['sendMessage', '📢 Powiadomienie od: User One\n📥 W wątku: Thread name\n\nsome content @wr', '11112222' ],
@@ -29,8 +29,8 @@ describe("CarbonCopyHandler", () => {
 
   it("processes two user handles", done => {
     let message    = sampleMessage("some content @wr @zt");
-    let chatApi    = new FakeChatApi();
-    let threadsApi = sampleThreadsApi()
+    let chatApi    = sampleChatApi();
+    let threadsApi = sampleThreadsApi();
     new CarbonCopyHandler(message, chatApi, threadsApi).run().then(() => {
       assert.deepEqual(chatApi.calls, [
         ['sendMessage', '📢 Powiadomienie od: User One\n📥 W wątku: Thread name\n\nsome content @wr @zt', '11112222' ],
@@ -43,8 +43,8 @@ describe("CarbonCopyHandler", () => {
 
   it("processes @all clause", done => {
     let message    = sampleMessage("some content @all");
-    let chatApi    = new FakeChatApi();
-    let threadsApi = sampleThreadsApi()
+    let chatApi    = sampleChatApi();
+    let threadsApi = sampleThreadsApi();
     new CarbonCopyHandler(message, chatApi, threadsApi).run().then(() => {
       assert.deepEqual(chatApi.calls, [
         ['sendMessage', '📢 Powiadomienie od: User One\n📥 W wątku: Thread name\n\nsome content @all', '11111111' ],
@@ -72,8 +72,22 @@ class FakeThreadsApi {
 
 class FakeChatApi {
   
-  constructor() {
+  constructor(participantsMap) {
     this.calls = [];
+    this.participantsData = {};
+    for (let userId in participantsMap) {
+      this.participantsData[userId] = {
+        name: participantsMap[userId],
+        firstName: participantsMap[userId].split(" ")[1],
+        vanity: 'irrelevant',
+        thumbSrc: 'irrelevant',
+        profileUrl: 'irrelevant',
+        gender: 2,
+        type: 'friend',
+        isFriend: false,
+        isBirthday: false,
+      };
+    }
   }
 
   sendMessage(...args) {
@@ -83,9 +97,9 @@ class FakeChatApi {
 
   getThreadInfo(...args) {
     return Promise.resolve({ 
-      participantIDs: [ '11111111', '11112222', '11113333' ],
+      participantIDs: Object.keys(this.participantsData),
       name: 'Thread name',
-      snippet: 'test @wr @ziomek',
+      snippet: 'irrelevant',
       messageCount: 38,
       emoji: null,
       nicknames: null,
@@ -95,41 +109,7 @@ class FakeChatApi {
   }
 
   getUserInfo(...args) {
-    return Promise.resolve({
-      '11111111': {
-        name: 'User One',
-        firstName: 'One',
-        vanity: 'tomekwr',
-        thumbSrc: 'https://some.thumb',
-        profileUrl: 'https://some.profile',
-        gender: 2,
-        type: 'friend',
-        isFriend: false,
-        isBirthday: false
-      },
-      '11112222': {
-        name: 'User Two',
-        firstName: 'Two',
-        vanity: 'tomekwr',
-        thumbSrc: 'https://some.thumb',
-        profileUrl: 'https://some.profile',
-        gender: 2,
-        type: 'friend',
-        isFriend: false,
-        isBirthday: false
-      },
-      '11113333': {
-        name: 'User Three',
-        firstName: 'Three',
-        vanity: 'tomekwr',
-        thumbSrc: 'https://some.thumb',
-        profileUrl: 'https://some.profile',
-        gender: 2,
-        type: 'friend',
-        isFriend: false,
-        isBirthday: false
-      }
-    });
+    return Promise.resolve(this.participantsData);
   }
 }
 
@@ -139,7 +119,7 @@ function sampleMessage(body) {
     senderID: '11111111',
     body: body,
     threadID: '22223333',
-    messageID: 'mid.$gAAQIKRjSPDRhTTNvM1bG-4m4_cn6',
+    messageID: 'irrelevant',
     attachments: [],
     timestamp: '1490822244147',
     isGroup: true,
@@ -152,5 +132,13 @@ function sampleThreadsApi() {
       "zt": "11113333",
       "wr": "11112222", 
     },
+  });
+}
+
+function sampleChatApi() {
+  return new FakeChatApi({
+    "11111111": "User One",
+    "11112222": "User Two",
+    "11113333": "User Three",
   });
 }
