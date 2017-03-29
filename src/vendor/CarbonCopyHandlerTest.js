@@ -5,11 +5,11 @@ const CarbonCopyHandler = require("./CarbonCopyHandler");
 describe("CarbonCopyHandler", () => {
 
   it("does nothing if message does not contain any user handles", done => {
-    let message    = sampleMessage("some content wr");
+    let message    = sampleMessage("some content");
     let chatApi    = sampleChatApi();
     let threadsApi = sampleThreadsApi();
     new CarbonCopyHandler(message, chatApi, threadsApi).run().then(() => {
-      assert.equal(chatApi.calls.length, 0);
+      assert.equal(chatApi.sentMessages.length, 0);
       done();
     });
   });
@@ -19,9 +19,9 @@ describe("CarbonCopyHandler", () => {
     let chatApi    = sampleChatApi();
     let threadsApi = sampleThreadsApi();
     new CarbonCopyHandler(message, chatApi, threadsApi).run().then(() => {
-      assert.deepEqual(chatApi.calls, [
-        ['sendMessage', '📢 Powiadomienie od: User One\n📥 W wątku: Thread name\n\nsome content @wr', '11112222' ],
-        ['sendMessage', '✔️ Two (wr) powiadomiony', '22223333'],
+      assert.deepEqual(chatApi.sentMessages, [
+        ['📢 Powiadomienie od: User One\n📥 W wątku: Thread name\n\nsome content @wr', '11112222' ],
+        ['✔️ Two (wr) powiadomiony', '22223333'],
       ]);
       done();
     });
@@ -32,10 +32,10 @@ describe("CarbonCopyHandler", () => {
     let chatApi    = sampleChatApi();
     let threadsApi = sampleThreadsApi();
     new CarbonCopyHandler(message, chatApi, threadsApi).run().then(() => {
-      assert.deepEqual(chatApi.calls, [
-        ['sendMessage', '📢 Powiadomienie od: User One\n📥 W wątku: Thread name\n\nsome content @wr @zt', '11112222' ],
-        ['sendMessage', '📢 Powiadomienie od: User One\n📥 W wątku: Thread name\n\nsome content @wr @zt', '11113333' ],
-        ['sendMessage', '✔️ Two (wr) powiadomiony\n✔️ Three (zt) powiadomiony', '22223333'],
+      assert.deepEqual(chatApi.sentMessages, [
+        ['📢 Powiadomienie od: User One\n📥 W wątku: Thread name\n\nsome content @wr @zt', '11112222' ],
+        ['📢 Powiadomienie od: User One\n📥 W wątku: Thread name\n\nsome content @wr @zt', '11113333' ],
+        ['✔️ Two (wr) powiadomiony\n✔️ Three (zt) powiadomiony', '22223333'],
       ]);
       done();
     });
@@ -46,11 +46,11 @@ describe("CarbonCopyHandler", () => {
     let chatApi    = sampleChatApi();
     let threadsApi = sampleThreadsApi();
     new CarbonCopyHandler(message, chatApi, threadsApi).run().then(() => {
-      assert.deepEqual(chatApi.calls, [
-        ['sendMessage', '📢 Powiadomienie od: User One\n📥 W wątku: Thread name\n\nsome content @all', '11111111' ],
-        ['sendMessage', '📢 Powiadomienie od: User One\n📥 W wątku: Thread name\n\nsome content @all', '11112222' ],
-        ['sendMessage', '📢 Powiadomienie od: User One\n📥 W wątku: Thread name\n\nsome content @all', '11113333' ],
-        ['sendMessage', '✔️ One (11111111) powiadomiony\n✔️ Two (11112222) powiadomiony\n✔️ Three (11113333) powiadomiony', '22223333'],
+      assert.deepEqual(chatApi.sentMessages, [
+        ['📢 Powiadomienie od: User One\n📥 W wątku: Thread name\n\nsome content @all', '11111111' ],
+        ['📢 Powiadomienie od: User One\n📥 W wątku: Thread name\n\nsome content @all', '11112222' ],
+        ['📢 Powiadomienie od: User One\n📥 W wątku: Thread name\n\nsome content @all', '11113333' ],
+        ['✔️ One (11111111) powiadomiony\n✔️ Two (11112222) powiadomiony\n✔️ Three (11113333) powiadomiony', '22223333'],
       ]);
       done();
     });
@@ -61,7 +61,6 @@ describe("CarbonCopyHandler", () => {
 class FakeThreadsApi {
 
   constructor(handlesToIds) {
-    this.calls = [];
     this.handlesToIds = handlesToIds;
   }
 
@@ -73,7 +72,7 @@ class FakeThreadsApi {
 class FakeChatApi {
   
   constructor(participantsMap) {
-    this.calls = [];
+    this.sentMessages = [];
     this.participantsData = {};
     for (let userId in participantsMap) {
       this.participantsData[userId] = {
@@ -90,8 +89,8 @@ class FakeChatApi {
     }
   }
 
-  sendMessage(...args) {
-    this.calls.push(["sendMessage", ...args]);
+  sendMessage(text, threadID) {
+    this.sentMessages.push([text, threadID]);
     return Promise.resolve({});
   }
 
