@@ -78,12 +78,10 @@ class FakeChatApi {
 
   sendMessage(...args) {
     this.calls.push(["sendMessage", ...args]);
-    // console.log("FakeChatApi received", ["sendMessage", ...args]);
     return Promise.resolve({});
   }
 
   getThreadInfo(...args) {
-    // console.log("FakeChatApi received", ["getThreadInfo", ...args]);
     return Promise.resolve({ 
       participantIDs: [ '11111111', '11112222', '11113333' ],
       name: 'Thread name',
@@ -97,7 +95,6 @@ class FakeChatApi {
   }
 
   getUserInfo(...args) {
-    // console.log("FakeChatApi received", ["getUserInfo", ...args]);
     return Promise.resolve({
       '11111111': {
         name: 'User One',
