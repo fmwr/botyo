@@ -106,16 +106,8 @@ class CarbonCopyHandler {
         const msg = this.msg;
 
         const senderId = parseInt(msg.senderID.split("fbid:")[1] || msg.senderID);
-        if (!senderId) {
-            // TODO: 
-            // resolve(failureText(username, "could not get senderId"));
-            return;
-        }
-
         const senderNamePromise = this.api.getUserInfo(senderId).then(info => info[senderId].name || Promise.reject("Could not get sender name", info));
         const threadInfoPromise = this.api.getThreadInfo(msg.threadID);
-
-        // TODO: exclude self
 
         return Promise
             .all([threadInfoPromise, senderNamePromise])
