@@ -77,7 +77,6 @@ class CarbonCopyHandler {
                     // TODO: unneeded call everytime
                     const threadNamePromise = this.api.getThreadInfo(msg.threadID).then(
                         info => {
-                            console.log("DEBUGGING", "CarbonCopyFilter.js", "getThreadInfo", info);
                             return info.name || Promise.reject("No thread name");
                         }
                     );
