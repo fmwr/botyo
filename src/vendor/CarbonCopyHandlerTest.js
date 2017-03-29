@@ -41,6 +41,21 @@ describe("CarbonCopyHandler", () => {
     });
   });
 
+  it("processes @all clause", done => {
+    let message    = sampleMessage("some content @all");
+    let chatApi    = new FakeChatApi();
+    let threadsApi = sampleThreadsApi()
+    new CarbonCopyHandler(message, chatApi, threadsApi).run().then(() => {
+      assert.deepEqual(chatApi.calls, [
+        ['sendMessage', '📢 Powiadomienie od: User One\n📥 W wątku: Thread name\n\nsome content @all', '11111111' ],
+        ['sendMessage', '📢 Powiadomienie od: User One\n📥 W wątku: Thread name\n\nsome content @all', '11112222' ],
+        ['sendMessage', '📢 Powiadomienie od: User One\n📥 W wątku: Thread name\n\nsome content @all', '11113333' ],
+        ['sendMessage', '✔️ One (11111111) powiadomiony\n✔️ Two (11112222) powiadomiony\n✔️ Three (11113333) powiadomiony', '22223333'],
+      ]);
+      done();
+    });
+  });
+
 });
 
 class FakeThreadsApi {

@@ -124,7 +124,7 @@ class CarbonCopyHandler {
 
                     const threadName = threadInfo.name;
 
-                    Promise
+                    return Promise
                         .all( threadInfo.participantIDs.map( participantID => {
 
                             return new Promise( (resolve, reject) => {
