@@ -42,61 +42,21 @@ export default class CarbonCopyFilter extends FilterModule {
 
         if (pingExpressions.includes("@all")) {
 
-
-            const senderId = parseInt(msg.senderID.split("fbid:")[1] || msg.senderID);
-            if (!senderId) {
-                // TODO: 
-                // resolve(failureText(username, "could not get senderId"));
-                return;
-            }
-
-            const senderNamePromise = this.api.getUserInfo(senderId).then(info => info[senderId].name || Promise.reject("Could not get sender name", info));
-            const threadInfoPromise = this.api.getThreadInfo(msg.threadID);
-
-            // TODO: exclude self
-
-            Promise
-                .all([threadInfoPromise, senderNamePromise])
-                .then(
-                    ([threadInfo, senderName]) => {
-
-                        const threadName = threadInfo.name;
-
-                        Promise
-                            .all( threadInfo.participantIDs.map( participantID => {
-
-                                return new Promise( (resolve, reject) => {
-
-                                    const targetNamePromise = this.api.getUserInfo(participantID).then(info => info[participantID].firstName || Promise.reject("Could not get target name", info));
-                                    const messageSentPromise = this.api.sendMessage(notificationText(senderName, threadName, msg.body), participantID);
-
-                                    Promise
-                                        .all([
-                                            targetNamePromise,
-                                            messageSentPromise,
-                                        ])
-                                        .then(
-                                            ([targetName]) => resolve(successText(participantID, targetName)),
-                                            error          => resolve(failureText(participantID, "nieznany błąd"))
-                                        );
-
-                                });
-
-                            }))
-                            .then(results => this.api.sendMessage(results.join("\n"), msg.threadID));
-
-                    },
-                    error => {
-                        console.log("DEBUGGING", "CarbonCopyFilter.js", "error around .all([threadInfoPromise, senderNamePromise])", error);
-                    }
-
-                )
-
+            this.pingAll(msg);
 
         } else {
 
-        // TODO: indentation!
+            this.pingMany(msg, pingExpressions);
+        }
 
+        return msg;
+    }
+
+    // 
+    // Private
+    // 
+
+    pingMany(msg, pingExpressions) {
         Promise
             .all( pingExpressions.map( pingExpression => {
 
@@ -145,9 +105,58 @@ export default class CarbonCopyFilter extends FilterModule {
             }))
             .then(results => this.api.sendMessage(results.join("\n"), msg.threadID));
 
+    }
+
+    pingAll(msg) {
+        const senderId = parseInt(msg.senderID.split("fbid:")[1] || msg.senderID);
+        if (!senderId) {
+            // TODO: 
+            // resolve(failureText(username, "could not get senderId"));
+            return;
         }
 
-        return msg;
+        const senderNamePromise = this.api.getUserInfo(senderId).then(info => info[senderId].name || Promise.reject("Could not get sender name", info));
+        const threadInfoPromise = this.api.getThreadInfo(msg.threadID);
+
+        // TODO: exclude self
+
+        Promise
+            .all([threadInfoPromise, senderNamePromise])
+            .then(
+                ([threadInfo, senderName]) => {
+
+                    const threadName = threadInfo.name;
+
+                    Promise
+                        .all( threadInfo.participantIDs.map( participantID => {
+
+                            return new Promise( (resolve, reject) => {
+
+                                const targetNamePromise = this.api.getUserInfo(participantID).then(info => info[participantID].firstName || Promise.reject("Could not get target name", info));
+                                const messageSentPromise = this.api.sendMessage(notificationText(senderName, threadName, msg.body), participantID);
+
+                                Promise
+                                    .all([
+                                        targetNamePromise,
+                                        messageSentPromise,
+                                    ])
+                                    .then(
+                                        ([targetName]) => resolve(successText(participantID, targetName)),
+                                        error          => resolve(failureText(participantID, "nieznany błąd"))
+                                    );
+
+                            });
+
+                        }))
+                        .then(results => this.api.sendMessage(results.join("\n"), msg.threadID));
+
+                },
+                error => {
+                    console.log("DEBUGGING", "CarbonCopyFilter.js", "error around .all([threadInfoPromise, senderNamePromise])", error);
+                }
+
+            )
+
     }
 
 }
