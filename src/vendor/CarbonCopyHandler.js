@@ -33,9 +33,9 @@ class CarbonCopyHandler {
         if (!pingExpressions.length === 0) return msg;
 
         if (pingExpressions.includes("@all")) {
-            this.pingAll();
+            return this.pingAll();
         } else {
-            this.pingMany(pingExpressions);
+            return this.pingMany(pingExpressions);
         }
     }
 
@@ -53,7 +53,7 @@ class CarbonCopyHandler {
     pingMany(pingExpressions) {
         const msg = this.msg;
 
-        Promise
+        return Promise
             .all( pingExpressions.map( pingExpression => {
 
                 return new Promise( (resolve, reject) => {
@@ -92,7 +92,7 @@ class CarbonCopyHandler {
                         .all()
                         .then(
                             ([targetName]) => resolve(successText(username, targetName)),
-                            error          => resolve(failureText(username, "nieznany błąd"))
+                            error          => resolve(failureText(username, error))
                         );
 
                 });
@@ -117,7 +117,7 @@ class CarbonCopyHandler {
 
         // TODO: exclude self
 
-        Promise
+        return Promise
             .all([threadInfoPromise, senderNamePromise])
             .then(
                 ([threadInfo, senderName]) => {
