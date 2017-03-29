@@ -7,7 +7,7 @@ describe("CarbonCopyHandler", () => {
   it("does nothing if message does not contain any user handles", done => {
     let message    = sampleMessage("some content wr");
     let chatApi    = new FakeChatApi();
-    let threadsApi = new FakeThreadsApi();
+    let threadsApi = sampleThreadsApi()
     new CarbonCopyHandler(message, chatApi, threadsApi).run().then(() => {
       assert.equal(chatApi.calls.length, 0);
       done();
@@ -17,7 +17,7 @@ describe("CarbonCopyHandler", () => {
   it("processes single user handle", done => {
     let message    = sampleMessage("some content @wr");
     let chatApi    = new FakeChatApi();
-    let threadsApi = new FakeThreadsApi();
+    let threadsApi = sampleThreadsApi()
     new CarbonCopyHandler(message, chatApi, threadsApi).run().then(() => {
       assert.deepEqual(chatApi.calls, [
         ['sendMessage', '📢 Powiadomienie od: User One\n📥 W wątku: Thread name\n\nsome content @wr', '11112222' ],
@@ -31,14 +31,9 @@ describe("CarbonCopyHandler", () => {
 
 class FakeThreadsApi {
 
-  constructor() {
+  constructor(handlesToIds) {
     this.calls = [];
-    this.handlesToIds = {
-      "22223333": {
-        "ziom": "11113333", 
-        "wr": "11112222", 
-      },
-    };
+    this.handlesToIds = handlesToIds;
   }
 
   getUserIdByThreadIdAndAlias(threadID, username) {
@@ -123,4 +118,13 @@ function sampleMessage(body) {
     timestamp: '1490822244147',
     isGroup: true,
   }
+}
+
+function sampleThreadsApi() {
+  return new FakeThreadsApi({
+    "22223333": {
+      "ziom": "11113333",
+      "wr": "11112222", 
+    },
+  });
 }
