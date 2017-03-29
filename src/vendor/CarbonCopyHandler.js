@@ -29,8 +29,8 @@ class CarbonCopyHandler {
         const msg = this.msg;
         const pingExpressions = this.extractPingExpressions(msg);
 
-        if (!pingExpressions) return msg;
-        if (!pingExpressions.length === 0) return msg;
+        if (!pingExpressions) return Promise.resolve({});
+        if (!pingExpressions.length === 0) return Promise.resolve({});
 
         if (pingExpressions.includes("@all")) {
             return this.pingAll();
