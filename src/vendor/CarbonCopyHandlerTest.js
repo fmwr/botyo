@@ -10,7 +10,6 @@ describe("CarbonCopyHandler", () => {
     let threadsApi = new FakeThreadsApi();
     new CarbonCopyHandler(message, chatApi, threadsApi).run().then(() => {
       assert.equal(chatApi.calls.length, 0);
-      assert.equal(threadsApi.calls.length, 0);
       done();
     });
   });
@@ -21,30 +20,29 @@ describe("CarbonCopyHandler", () => {
     let threadsApi = new FakeThreadsApi();
     new CarbonCopyHandler(message, chatApi, threadsApi).run().then(() => {
       assert.deepEqual(chatApi.calls, [
-        ['getThreadInfo', '22223333'],
-        ['getUserInfo', 11112222],
-        ['getUserInfo', '11113333'],
-        ['sendMessage', '📢 Powiadomienie od: User One\n📥 W wątku: Thread name\n\nsome content @wr', '11113333' ],
+        ['sendMessage', '📢 Powiadomienie od: User One\n📥 W wątku: Thread name\n\nsome content @wr', '11112222' ],
         ['sendMessage', '✔️ Two (wr) powiadomiony', '22223333'],
-      ]);
-      assert.deepEqual(threadsApi.calls, [
-        ['getUserIdByThreadIdAndAlias', '22223333', 'wr'],
       ]);
       done();
     });
   });
+
 });
 
 class FakeThreadsApi {
 
   constructor() {
     this.calls = [];
+    this.handlesToIds = {
+      "22223333": {
+        "ziom": "11113333", 
+        "wr": "11112222", 
+      },
+    };
   }
 
-  getUserIdByThreadIdAndAlias(...args) {
-    this.calls.push(["getUserIdByThreadIdAndAlias", ...args]);
-    // console.log("FakeThreadsApi received", ["getUserIdByThreadIdAndAlias", ...args]);
-    return '11113333';
+  getUserIdByThreadIdAndAlias(threadID, username) {
+    return this.handlesToIds[threadID][username];
   }
 }
 
@@ -61,7 +59,6 @@ class FakeChatApi {
   }
 
   getThreadInfo(...args) {
-    this.calls.push(["getThreadInfo", ...args]);
     // console.log("FakeChatApi received", ["getThreadInfo", ...args]);
     return Promise.resolve({ 
       participantIDs: [ '11111111', '11112222', '11113333' ],
@@ -76,10 +73,9 @@ class FakeChatApi {
   }
 
   getUserInfo(...args) {
-    this.calls.push(["getUserInfo", ...args]);
     // console.log("FakeChatApi received", ["getUserInfo", ...args]);
     return Promise.resolve({
-      '11112222': {
+      '11111111': {
         name: 'User One',
         firstName: 'One',
         vanity: 'tomekwr',
@@ -90,9 +86,20 @@ class FakeChatApi {
         isFriend: false,
         isBirthday: false
       },
-      '11113333': {
+      '11112222': {
         name: 'User Two',
         firstName: 'Two',
+        vanity: 'tomekwr',
+        thumbSrc: 'https://some.thumb',
+        profileUrl: 'https://some.profile',
+        gender: 2,
+        type: 'friend',
+        isFriend: false,
+        isBirthday: false
+      },
+      '11113333': {
+        name: 'User Three',
+        firstName: 'Three',
         vanity: 'tomekwr',
         thumbSrc: 'https://some.thumb',
         profileUrl: 'https://some.profile',
@@ -108,7 +115,7 @@ class FakeChatApi {
 function sampleMessage(body) {
   return {
     type: 'message',
-    senderID: '11112222',
+    senderID: '11111111',
     body: body,
     threadID: '22223333',
     messageID: 'mid.$gAAQIKRjSPDRhTTNvM1bG-4m4_cn6',
