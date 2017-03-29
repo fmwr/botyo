@@ -32,13 +32,12 @@ export default class CarbonCopyFilter extends FilterModule {
     }
 
     filter(msg) {
-
         if (!msg.body) return msg;
 
-        const bodyWithoutDiacritics = remove(msg.body);
-        const pingExpressions = bodyWithoutDiacritics.match(/@\w+/g);
+        const pingExpressions = this.extractPingExpressions(msg);
 
         if (!pingExpressions) return msg;
+        if (!pingExpressions.length === 0) return msg;
 
         if (pingExpressions.includes("@all")) {
 
@@ -55,6 +54,12 @@ export default class CarbonCopyFilter extends FilterModule {
     // 
     // Private
     // 
+
+    extractPingExpressions(msg) {
+        const bodyWithoutDiacritics = remove(msg.body);
+        const pingExpressions = bodyWithoutDiacritics.match(/@\w+/g);
+        return pingExpressions;
+    }
 
     pingMany(msg, pingExpressions) {
         Promise
