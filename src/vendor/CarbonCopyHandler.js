@@ -53,6 +53,10 @@ class CarbonCopyHandler {
     pingMany(pingExpressions) {
         const msg = this.msg;
 
+        const senderId = parseInt(msg.senderID.split("fbid:")[1] || msg.senderID);
+        const threadNamePromise = this.api.getThreadInfo(msg.threadID).then(info => info.name || Promise.reject("No thread name"));
+        const senderNamePromise = this.api.getUserInfo(senderId).then(info => info[senderId].name || Promise.reject("Could not get sender name", info));
+
         return Promise
             .all( pingExpressions.map( pingExpression => {
 
@@ -66,21 +70,6 @@ class CarbonCopyHandler {
                         return;
                     }
 
-                    // TODO: unneeded call everytime
-                    const senderId = parseInt(msg.senderID.split("fbid:")[1] || msg.senderID);
-                    if (!senderId) {
-                        // TODO: username pointless here
-                        resolve(failureText("senderID", "could not get senderId"));
-                        return;
-                    }
-
-                    // TODO: unneeded call everytime
-                    const threadNamePromise = this.api.getThreadInfo(msg.threadID).then(
-                        info => {
-                            return info.name || Promise.reject("No thread name");
-                        }
-                    );
-                    const senderNamePromise = this.api.getUserInfo(senderId).then(info => info[senderId].name || Promise.reject("Could not get sender name", info));
                     const targetNamePromise = this.api.getUserInfo(targetId).then(info => info[targetId].firstName || Promise.reject("Could not get target name", info));
 
                     Promise
