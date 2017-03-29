@@ -21,47 +21,42 @@ function notificationText(senderName, threadName, content) {
     );
 }
 
-@Singleton
-@Inject(ChatApi, Threads)
-export default class CarbonCopyFilter extends FilterModule {
+class CarbonCopyHandler {
 
-    constructor(api, threads) {
-        super();
+    constructor(msg, api, threads) {
+        this.msg = msg;
         this.api = api;
         this.threads = threads;
     }
 
-    filter(msg) {
-        if (!msg.body) return msg;
-
+    run() {
+        const msg = this.msg;
         const pingExpressions = this.extractPingExpressions(msg);
 
         if (!pingExpressions) return msg;
         if (!pingExpressions.length === 0) return msg;
 
         if (pingExpressions.includes("@all")) {
-
-            this.pingAll(msg);
-
+            this.pingAll();
         } else {
-
-            this.pingMany(msg, pingExpressions);
+            this.pingMany(pingExpressions);
         }
-
-        return msg;
     }
 
     // 
     // Private
     // 
 
-    extractPingExpressions(msg) {
+    extractPingExpressions() {
+        const msg = this.msg;
         const bodyWithoutDiacritics = remove(msg.body);
         const pingExpressions = bodyWithoutDiacritics.match(/@\w+/g);
         return pingExpressions;
     }
 
-    pingMany(msg, pingExpressions) {
+    pingMany(pingExpressions) {
+        const msg = this.msg;
+
         Promise
             .all( pingExpressions.map( pingExpression => {
 
@@ -112,7 +107,9 @@ export default class CarbonCopyFilter extends FilterModule {
 
     }
 
-    pingAll(msg) {
+    pingAll() {
+        const msg = this.msg;
+
         const senderId = parseInt(msg.senderID.split("fbid:")[1] || msg.senderID);
         if (!senderId) {
             // TODO: 
@@ -162,6 +159,31 @@ export default class CarbonCopyFilter extends FilterModule {
 
             )
 
+    }
+
+
+}
+
+@Singleton
+@Inject(ChatApi, Threads)
+export default class CarbonCopyFilter extends FilterModule {
+
+    constructor(api, threads) {
+        super();
+        this.api = api;
+        this.threads = threads;
+    }
+
+    filter(message) {
+        if (!message.body) return message;
+
+        new CarbonCopyHandler(
+            message,
+            this.api,
+            this.threads,
+        ).run();
+
+        return message;
     }
 
 }
