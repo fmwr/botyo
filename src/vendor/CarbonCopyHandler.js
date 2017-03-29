@@ -1,5 +1,5 @@
-import Promise from "bluebird";
-import { remove } from "diacritics";
+const Promise = require("bluebird");
+const remove = require("diacritics").remove;
 
 function failureText(handle, reason) {
     return `\u{2757}\u{FE0F} użytkownik ${handle} - ${reason}`;
@@ -17,7 +17,7 @@ function notificationText(senderName, threadName, content) {
     );
 }
 
-export default class CarbonCopyHandler {
+class CarbonCopyHandler {
 
     constructor(msg, api, threads) {
         this.msg = msg;
@@ -158,3 +158,5 @@ export default class CarbonCopyHandler {
     }
 
 }
+
+module.exports = CarbonCopyHandler;
