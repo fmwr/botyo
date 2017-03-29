@@ -6,7 +6,7 @@ function failureText(handle, reason) {
 }
 
 function successText(handle, targetName) {
-    return `\u{2714}\u{FE0F} ${targetName} (${handle}) powiadomiony`;
+    return `\u{2714}\u{FE0F} Powiadomiono ${targetName}`;
 }
 
 function notificationText(senderName, threadName, content) {
